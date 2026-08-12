@@ -2,6 +2,8 @@
 
 > 一个证据驱动的 Codex Skill：从研究方向选择，到论点—证据组织、IMRaD 成稿、科技英语修改和投稿前审计。
 
+![Research to Paper Workflow：从研究选择到投稿审计的证据驱动工作流](docs/images/hero-research-to-paper.png)
+
 `research-to-paper-workflow` 解决的不是“怎样一次生成一篇看起来像论文的文字”，而是另一个更关键的问题：**当前研究究竟处于哪一步，现有证据允许我们完成什么，下一份可检查的成果是什么？**
 
 它允许从任意阶段进入，但不允许用流畅语言掩盖证据缺口。
@@ -29,6 +31,8 @@
 这是一项**独立的工作流综合**，不是三本书的官方改编、替代品或内容复刻。仓库不包含章节全文、专有练习或长篇引文。哪些内容来自公开可确认的书目范围，哪些属于工作流综合和通用科研写作实践，详见 [source-map.md](references/source-map.md)。
 
 ## 五阶段工作流
+
+![五阶段科研写作工作流：选择、证据、IMRaD、英语与审计](docs/images/workflow-five-stages.png)
 
 ```mermaid
 flowchart LR
@@ -58,6 +62,8 @@ flowchart LR
 ```
 
 ## 核心护栏
+
+![证据优先于语言：事实、推断、假设与未知的分级审计](docs/images/evidence-before-language.png)
 
 - 区分 **Verified fact / Inference / Hypothesis / Unknown**。
 - 不虚构数据、样本量、显著性、方法、引用、实验条件或机制。

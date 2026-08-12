@@ -25,8 +25,12 @@ foreach ($relative in $required) {
     }
 }
 
+$textExtensions = @('.md', '.yaml', '.yml', '.ps1', '.gitignore', '')
 $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
-    Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' }
+    Where-Object {
+        $_.FullName -notmatch '[\\/]\.git[\\/]' -and
+        $_.Extension -in $textExtensions
+    }
 $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
 $allText = [System.Collections.Generic.List[string]]::new()
 $runtimeText = [System.Collections.Generic.List[string]]::new()
@@ -45,6 +49,20 @@ foreach ($file in $textFiles) {
         }
     } catch {
         Add-Failure "Invalid UTF-8: $($file.FullName.Substring($repoRoot.Length + 1))"
+    }
+}
+
+$imageFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Filter '*.png' |
+    Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' }
+foreach ($file in $imageFiles) {
+    $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
+    $signature = if ($bytes.Length -ge 8) {
+        [System.BitConverter]::ToString($bytes[0..7])
+    } else {
+        ''
+    }
+    if ($signature -ne '89-50-4E-47-0D-0A-1A-0A') {
+        Add-Failure "Invalid PNG signature: $($file.FullName.Substring($repoRoot.Length + 1))"
     }
 }
 
@@ -116,7 +134,8 @@ $markdownFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File -Filter '*.
     Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' }
 foreach ($markdownFile in $markdownFiles) {
     $markdown = Get-Content -Raw -Encoding UTF8 $markdownFile.FullName
-    $localLinks = [regex]::Matches($markdown, '\[[^\]]+\]\((?<path>[^)#]+)\)')
+    $markdownWithoutCodeFences = [regex]::Replace($markdown, '(?ms)```.*?```', '')
+    $localLinks = [regex]::Matches($markdownWithoutCodeFences, '\[[^\]]+\]\((?<path>[^)#]+)\)')
     foreach ($localLink in $localLinks) {
         $relativeTarget = $localLink.Groups['path'].Value
         if ($relativeTarget -match '^[a-z]+://' -or $relativeTarget.StartsWith('<')) { continue }
@@ -143,7 +162,7 @@ if (-not $openaiYaml.Contains('$research-to-paper-workflow')) {
 $unexpectedBinary = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
     Where-Object {
         $_.FullName -notmatch '[\\/]\.git[\\/]' -and
-        $_.Extension -notin @('.md', '.yaml', '.yml', '.ps1', '.gitignore', '')
+        $_.Extension -notin @('.md', '.yaml', '.yml', '.ps1', '.gitignore', '.png', '')
     }
 foreach ($file in $unexpectedBinary) {
     Add-Failure "Unexpected file type: $($file.FullName.Substring($repoRoot.Length + 1))"
@@ -163,6 +182,7 @@ if ($failures.Count -gt 0) {
 Write-Output "STRUCTURAL_VALIDATION_OK"
 Write-Output "RUNTIME_FILES=$($required.Count)"
 Write-Output "TEXT_FILES_CHECKED=$($textFiles.Count)"
+Write-Output "IMAGE_FILES_CHECKED=$($imageFiles.Count)"
 Write-Output "ROUTES=$($routes.Count)"
 Write-Output "DECISION_FIELDS=$decisionFieldCount"
 Write-Output "STRUCTURAL_VALIDATION_FAILURES=0"
