@@ -1,0 +1,5 @@
+interface:
+  display_name: "Research to Paper Workflow"
+  short_description: "从研究方向选择、证据组织到英文论文成稿与审计的完整工作流"
+  default_prompt: "Use $research-to-paper-workflow to identify my current research stage and produce the next evidence-grounded artifact."
+
